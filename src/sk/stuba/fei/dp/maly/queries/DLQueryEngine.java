@@ -2,10 +2,16 @@ package sk.stuba.fei.dp.maly.queries;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.apache.jena.ontology.Ontology;
+import org.dllearner.core.Reasoner;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
@@ -13,64 +19,47 @@ import org.semanticweb.owlapi.util.ShortFormProvider;
 
 
 public class DLQueryEngine {
-    private final OWLReasoner reasoner;
+    private final Reasoner reasoner;
     private final DLQueryParser parser;
 
-    public DLQueryEngine(OWLReasoner reasoner, ShortFormProvider shortFormProvider) {
+    public DLQueryEngine(Reasoner reasoner, OWLOntology ontology ,ShortFormProvider shortFormProvider) {
         this.reasoner = reasoner;
-        parser = new DLQueryParser(reasoner.getRootOntology(), shortFormProvider);
+        parser = new DLQueryParser(ontology, shortFormProvider);
     }
 
-    public Set<OWLClass> getSuperClasses(String classExpressionString, boolean direct) {
+    public Set<OWLClassExpression> getSuperClasses(String classExpressionString) {
         if (classExpressionString.trim().length() == 0) {
             return Collections.emptySet();
         }
         OWLClassExpression classExpression = parser
                 .parseClassExpression(classExpressionString);
-        NodeSet<OWLClass> superClasses = reasoner
-                .getSuperClasses(classExpression, direct);
-        return superClasses.getFlattened();
+        SortedSet<OWLClassExpression> superClasses = reasoner
+                .getSuperClasses(classExpression);
+        return superClasses;
     }
 
-    public Set<OWLClass> getEquivalentClasses(String classExpressionString) {
+
+    public Set<OWLClassExpression> getSubClasses(String classExpressionString) {
         if (classExpressionString.trim().length() == 0) {
             return Collections.emptySet();
         }
         OWLClassExpression classExpression = parser
                 .parseClassExpression(classExpressionString);
-        Node<OWLClass> equivalentClasses = reasoner.getEquivalentClasses(classExpression);
-        Set<OWLClass> result = null;
-        if (classExpression.isAnonymous()) {
-            result = equivalentClasses.getEntities();
-        } else {
-            result = equivalentClasses.getEntitiesMinus(classExpression.asOWLClass());
-        }
-        return result;
+        SortedSet<OWLClassExpression> subClasses = reasoner.getSubClasses(classExpression);
+        return subClasses;
         }
 
-    public Set<OWLClass> getSubClasses(String classExpressionString, boolean direct) {
+    public Set<OWLIndividual> getInstances(String classExpressionString) {
         if (classExpressionString.trim().length() == 0) {
             return Collections.emptySet();
         }
         OWLClassExpression classExpression = parser
                 .parseClassExpression(classExpressionString);
-        NodeSet<OWLClass> subClasses = reasoner.getSubClasses(classExpression, direct);
-        return subClasses.getFlattened();
-        }
-
-    public Set<OWLNamedIndividual> getInstances(String classExpressionString,
-            boolean direct) {
-        if (classExpressionString.trim().length() == 0) {
-            return Collections.emptySet();
-        }
-        OWLClassExpression classExpression = parser
-                .parseClassExpression(classExpressionString);
-        NodeSet<OWLNamedIndividual> individuals = reasoner.getInstances(classExpression,
-                direct);
-        return individuals.getFlattened();
+        SortedSet<OWLIndividual> individuals = reasoner.getIndividuals(classExpression);
+        return individuals;
         }
     
-    public Set<OWLClass> getClassOfIndividual(OWLNamedIndividual individual){
-    	return reasoner.getTypes(individual, true).getFlattened();
+    public Set<OWLClass> getClassOfIndividual(OWLIndividual individual){
+    	return reasoner.getTypes(individual);
     }
     }

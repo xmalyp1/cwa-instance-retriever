@@ -4,6 +4,7 @@
 	<groupId>fei.stuba.dp.maly.patrik</groupId>
 	<artifactId>CwaReasoner</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -11,8 +12,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source />
-					<target />
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -21,12 +22,17 @@
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>owlapi-distribution</artifactId>
-			<version>3.5.1</version>
+			<version>4.2.4</version>
 		</dependency>
 		<dependency>
-			<groupId>com.hermit-reasoner</groupId>
+			<groupId>net.sourceforge.owlapi</groupId>
 			<artifactId>org.semanticweb.hermit</artifactId>
-			<version>1.3.8.4</version>
+			<version>1.3.8.413</version>
+		</dependency>
+		<dependency>
+			<groupId>org.dllearner</groupId>
+			<artifactId>components-core</artifactId>
+			<version>1.3.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

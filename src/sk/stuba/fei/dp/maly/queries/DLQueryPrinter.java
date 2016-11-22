@@ -6,12 +6,11 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLEntity;
+import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 
 import sk.stuba.fei.dp.maly.ui.models.IndividualsDatatableModel;
-
-import org.semanticweb.owlapi.expression.ParserException;
 
 
 public class DLQueryPrinter {
@@ -22,12 +21,11 @@ public class DLQueryPrinter {
         this.shortFormProvider = shortFormProvider;
         dlQueryEngine = engine;
         }
-
+/*
     public void askQuery(String classExpression) {
         if (classExpression.length() == 0) {
             System.out.println("No class expression specified");
         } else {
-            try {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\\nQUERY:   ").append(classExpression).append("\\n\\n");
                 Set<OWLClass> superClasses = dlQueryEngine.getSuperClasses(
@@ -40,15 +38,12 @@ public class DLQueryPrinter {
                         true);
                 printEntities("SubClasses", subClasses, sb);
                 Set<OWLNamedIndividual> individuals = dlQueryEngine.getInstances(
-                        classExpression, true);
+                        classExpression);
                 printEntities("Instances", individuals, sb);
                 System.out.println(sb.toString());
-            } catch (ParserException e) {
-                System.out.println(e.getMessage());
-            }
             }
         }
-
+*/
     private void printEntities(String name, Set<? extends OWLEntity> entities,
             StringBuilder sb) {
         sb.append(name);
@@ -71,15 +66,17 @@ public class DLQueryPrinter {
     public List<IndividualsDatatableModel> getIndividuals(String classExpression){
 		System.out.println(classExpression);
     	List<IndividualsDatatableModel> result = new ArrayList<IndividualsDatatableModel>();
-		Set<OWLNamedIndividual> individuals = dlQueryEngine.getInstances(
-                classExpression, true);
-		for(OWLNamedIndividual classInstance : individuals){
+		Set<OWLIndividual> individuals = dlQueryEngine.getInstances(
+                classExpression);
+		for(OWLIndividual classNonNamedInstance : individuals){
+			OWLNamedIndividual classInstance = (OWLNamedIndividual) classNonNamedInstance;
 			StringBuilder sb = new StringBuilder();
 			Set<OWLClass> inClass = dlQueryEngine.getClassOfIndividual(classInstance);
 			for(OWLClass cClass : inClass){
 				sb.append(shortFormProvider.getShortForm(cClass));
 				sb.append(",");
 			}
+			if(sb.length() > 0)
 			sb.deleteCharAt(sb.length()-1);
 			System.out.println(sb.toString());
 			result.add(new IndividualsDatatableModel(shortFormProvider.getShortForm(classInstance),sb.toString()));

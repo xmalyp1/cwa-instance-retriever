@@ -5,6 +5,14 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import org.dllearner.core.AbstractKnowledgeSource;
+import org.dllearner.core.ComponentInitException;
+import org.dllearner.core.KnowledgeSource;
+import org.dllearner.kb.OWLAPIOntology;
+import org.dllearner.kb.OWLOntologyKnowledgeSource;
+import org.dllearner.reasoning.ClosedWorldReasoner;
+import org.dllearner.reasoning.OWLAPIReasoner;
+import org.dllearner.reasoning.ReasonerImplementation;
 import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -24,7 +32,8 @@ public class InstanceRetriever {
 	
 	private OWLOntologyManager ontologyManager;
 	private OWLOntology ontology;
-	private OWLReasoner reasoner;
+//	private OWLReasoner reasoner;
+	private ClosedWorldReasoner cwaReasoner;
 	
 	public InstanceRetriever(){
 		this.ontologyManager = OWLManager.createOWLOntologyManager();
@@ -76,15 +85,24 @@ public class InstanceRetriever {
 	                .loadOntologyFromOntologyDocument(f);
 	 }
 	 
-	 public void initializeReasoner(){
-		 this.reasoner = new Reasoner.ReasonerFactory().createReasoner(ontology);
-	 }
+	 public void initializeReasoner() throws ComponentInitException{
+			AbstractKnowledgeSource ks = new OWLAPIOntology(ontology);
+			ks.init();
+			OWLAPIReasoner pellet= new OWLAPIReasoner((KnowledgeSource)ks);
+			pellet.setReasonerImplementation(ReasonerImplementation.PELLET);
+			pellet.setSources(((OWLOntologyKnowledgeSource) ks));
+			
+			// setup the reasoner
+			pellet.init();
+			cwaReasoner = new ClosedWorldReasoner(pellet);
+			cwaReasoner.init();
+	}
 	
-	 public List<IndividualsDatatableModel> getIndividuals(String classExpression){
+	 public List<IndividualsDatatableModel> getIndividuals(String classExpression,boolean cwaMode){
 	        ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
 	        // Create the DLQueryPrinter helper class. This will manage the
 	        // parsing of input and printing of results
-	        DLQueryPrinter dlQueryPrinter = new DLQueryPrinter(new DLQueryEngine(reasoner,
+	        DLQueryPrinter dlQueryPrinter = new DLQueryPrinter(new DLQueryEngine(cwaMode ? cwaReasoner : cwaReasoner.getReasonerComponent(),cwaReasoner.getReasonerComponent().getOntology(),
 	                shortFormProvider), shortFormProvider);	
 	       return dlQueryPrinter.getIndividuals(classExpression.trim());
 	 }
@@ -97,13 +115,15 @@ public class InstanceRetriever {
 		this.ontology = ontology;
 	}
 
-	public OWLReasoner getReasoner() {
-		return reasoner;
+	public ClosedWorldReasoner getCwaReasoner() {
+		return cwaReasoner;
 	}
 
-	public void setReasoner(OWLReasoner reasoner) {
-		this.reasoner = reasoner;
+	public void setCwaReasoner(ClosedWorldReasoner cwaReasoner) {
+		this.cwaReasoner = cwaReasoner;
 	}
+
+
 	 
 	 
 }

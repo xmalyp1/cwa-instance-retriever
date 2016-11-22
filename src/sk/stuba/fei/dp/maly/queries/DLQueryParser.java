@@ -2,9 +2,9 @@ package sk.stuba.fei.dp.maly.queries;
 
 import java.util.Set;
 
-import org.coode.owlapi.manchesterowlsyntax.ManchesterOWLSyntaxEditorParser;
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
+import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxClassExpressionParser;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -31,12 +31,12 @@ public class DLQueryParser {
     public OWLClassExpression parseClassExpression(String classExpressionString) {
         OWLDataFactory dataFactory = rootOntology.getOWLOntologyManager()
                 .getOWLDataFactory();
-     
-        ManchesterOWLSyntaxEditorParser parser = new ManchesterOWLSyntaxEditorParser(
-                dataFactory, classExpressionString);
-        parser.setDefaultOntology(rootOntology);
+        
         OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
+     
+        ManchesterOWLSyntaxClassExpressionParser parser = new ManchesterOWLSyntaxClassExpressionParser(
+                dataFactory,entityChecker);
         parser.setOWLEntityChecker(entityChecker);
-        return parser.parseClassExpression();
+        return parser.parse(classExpressionString);
         }
     }

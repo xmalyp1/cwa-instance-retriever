@@ -4,36 +4,22 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
 
-import org.codehaus.stax2.ri.typed.ValueDecoderFactory.LongArrayDecoder;
+import org.dllearner.core.ComponentInitException;
 import org.semanticweb.owlapi.model.OWLException;
-
-import java.awt.BorderLayout;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
 
 import sk.stuba.fei.dp.maly.retriever.InstanceRetriever;
 import sk.stuba.fei.dp.maly.ui.models.IndividualsDatatableModel;
 
-import java.awt.GridLayout;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
@@ -41,10 +27,9 @@ import javax.swing.JFileChooser;
 
 import java.awt.Font;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.TableColumnModelListener;
-import javax.swing.event.TableModelListener;
+import javax.swing.SwingConstants;
 import javax.swing.JTable;
+import javax.swing.JToggleButton;
 
 public class RetrieverGUI {
 
@@ -62,6 +47,7 @@ public class RetrieverGUI {
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					RetrieverGUI window = new RetrieverGUI();
@@ -80,6 +66,7 @@ public class RetrieverGUI {
 		initialize();
 		instanceRetriever = new InstanceRetriever();
 		fileChooser = new JFileChooser();
+		fileChooser.setCurrentDirectory(new File("."));
 		fileChooser.addChoosableFileFilter(new OwlFileFilter());
 	}
 
@@ -89,10 +76,10 @@ public class RetrieverGUI {
 	private void initialize() {
 		frmCwaInstanceRetriever = new JFrame();
 		frmCwaInstanceRetriever.getContentPane().setLayout(null);
-		frmCwaInstanceRetriever.setSize(435, 288);
+		frmCwaInstanceRetriever.setSize(751, 414);
 
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(0, 0, 428, 244);
+		JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP);
+		tabbedPane.setBounds(0, 0, 729, 358);
 		frmCwaInstanceRetriever.getContentPane().add(tabbedPane);
 
 		tabbedPane.addTab("Load Ontology", createLoadTab());
@@ -107,12 +94,12 @@ public class RetrieverGUI {
 		
 		conceptField = new JTextField();
 		conceptField.setToolTipText("Pizza and not (hasTopping some FishTopping)");
-		conceptField.setBounds(99, 13, 296, 26);
+		conceptField.setBounds(99, 13, 428, 26);
 		panelRetriever.add(conceptField);
 		conceptField.setColumns(10);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(15, 94, 380, 100);
+		scrollPane.setBounds(15, 94, 694, 214);
 		panelRetriever.add(scrollPane);
 
 		instancesTable = new JTable();
@@ -121,10 +108,15 @@ public class RetrieverGUI {
 		instancesTable.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		
 		JButton btnGetInstances = new JButton("Get instances");
-		btnGetInstances.setBounds(15, 53, 162, 29);
+		btnGetInstances.setBounds(15, 52, 162, 29);
 		panelRetriever.add(btnGetInstances);
+		
+		JToggleButton btnCwa = new JToggleButton("CWA Mode");
+		btnCwa.setBounds(546, 12, 163, 29);
+		panelRetriever.add(btnCwa);
 		btnGetInstances.addActionListener(new ActionListener() {
 			
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(instanceRetriever.getOntology() == null){
 					JOptionPane.showMessageDialog(panelRetriever, "The ontology is not loaded.", "Error",
@@ -132,9 +124,16 @@ public class RetrieverGUI {
 					return;
 				}
 				
-				instanceRetriever.initializeReasoner();
+				try {
+					instanceRetriever.initializeReasoner();
+				} catch (ComponentInitException e1) {
+					JOptionPane.showMessageDialog(panelRetriever, "Failed to initialize the CWA Reasoner component.", "Error",
+							JOptionPane.ERROR_MESSAGE);					
+					e1.printStackTrace();
+					return;
+				}
 				
-				if(instanceRetriever.getReasoner() == null){
+				if(instanceRetriever.getCwaReasoner() == null){
 					JOptionPane.showMessageDialog(panelRetriever, "The reasoner was not loaded.", "Error",
 							JOptionPane.ERROR_MESSAGE);					
 					return;
@@ -143,8 +142,8 @@ public class RetrieverGUI {
 				if(conceptField.getText().isEmpty())
 					return;
 				
-				List<IndividualsDatatableModel> individuals = instanceRetriever.getIndividuals(conceptField.getText());
-				
+				List<IndividualsDatatableModel> individuals = instanceRetriever.getIndividuals(conceptField.getText(),btnCwa.isSelected());
+				instancesTable.setModel(new DefaultTableModel(DATATABLE_COLUMNS, 0));
 				DefaultTableModel model = (DefaultTableModel) instancesTable.getModel();
 				for(IndividualsDatatableModel individual:individuals){
 					Object[] row ={individual.getNamedIndividual(),individual.getIndividualClass()};
@@ -178,7 +177,7 @@ public class RetrieverGUI {
 		loadPanel.add(loadedFileLabel);
 
 		final JLabel loadedInfoLabel = new JLabel("");
-		loadedInfoLabel.setBounds(15, 133, 393, 61);
+		loadedInfoLabel.setBounds(15, 133, 415, 175);
 		loadPanel.add(loadedInfoLabel);
 
 		final JButton btnLoadOntology = new JButton("Load Ontology");
@@ -187,6 +186,7 @@ public class RetrieverGUI {
 		loadPanel.add(btnLoadOntology);
 		btnLoadOntology.addActionListener(new ActionListener() {
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					if (selectedFile != null) {
@@ -216,6 +216,7 @@ public class RetrieverGUI {
 		loadPanel.add(btnSelectFile);
 		btnSelectFile.addActionListener(new ActionListener() {
 
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				int returnVal = fileChooser.showOpenDialog(loadPanel);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
