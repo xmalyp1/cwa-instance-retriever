@@ -32,77 +32,38 @@ public class InstanceRetriever {
 	
 	private OWLOntologyManager ontologyManager;
 	private OWLOntology ontology;
-//	private OWLReasoner reasoner;
 	private ClosedWorldReasoner cwaReasoner;
 	
 	public InstanceRetriever(){
 		this.ontologyManager = OWLManager.createOWLOntologyManager();
 	}
 
-	/*
-	 public static void main(String[] args) throws Exception {
-	        // Load an example ontology.
-	        OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-	        File f = new File("pizza.owl");
-	        if(!f.exists())
-	        	f.createNewFile();
-	        OWLOntology ontology = manager
-	                .loadOntologyFromOntologyDocument(new File("pizza.owl"));
-	        // We need a reasoner to do our query answering
-
-
-	        // These two lines are the only relevant difference between this code and the original example
-	        // This example uses HermiT: http://hermit-reasoner.com/
-	        OWLReasoner reasoner = new Reasoner.ReasonerFactory().createReasoner(ontology);
-
-
-
-	        ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
-	        // Create the DLQueryPrinter helper class. This will manage the
-	        // parsing of input and printing of results
-	        DLQueryPrinter dlQueryPrinter = new DLQueryPrinter(new DLQueryEngine(reasoner,
-	                shortFormProvider), shortFormProvider);
-	        // Enter the query loop. A user is expected to enter class
-	        // expression on the command line.
-	        BufferedReader br = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-	        while (true) {
-	            System.out
-	                    .println("Type a class expression in Manchester Syntax and press Enter (or press x to exit):");
-	            String classExpression = br.readLine();
-	            // Check for exit condition
-	            if (classExpression == null || classExpression.equalsIgnoreCase("x")) {
-	                break;
-	            }
-	            dlQueryPrinter.askQuery(classExpression.trim());
-	            System.out.println();
-	            }
-	        }
-	 
-	 */
-	 public void createOntology(File f) throws OWLException{
+	public void createOntology(File f) throws OWLException{
 		 ontologyManager = OWLManager.createOWLOntologyManager();
 		 ontology = ontologyManager
 	                .loadOntologyFromOntologyDocument(f);
 	 }
 	 
-	 public void initializeReasoner() throws ComponentInitException{
-			AbstractKnowledgeSource ks = new OWLAPIOntology(ontology);
+	 private void initializeReasoner(RetrieverConfiguration config) throws ComponentInitException{
+			AbstractKnowledgeSource ks = new OWLAPIOntology(config.getOntology());
 			ks.init();
-			OWLAPIReasoner pellet= new OWLAPIReasoner((KnowledgeSource)ks);
-			pellet.setReasonerImplementation(ReasonerImplementation.PELLET);
-			pellet.setSources(((OWLOntologyKnowledgeSource) ks));
+			OWLAPIReasoner reasoner= new OWLAPIReasoner((KnowledgeSource)ks);
+		 	reasoner.setReasonerImplementation(config.getReasoner());
+		 	reasoner.setSources(((OWLOntologyKnowledgeSource) ks));
 			
 			// setup the reasoner
-			pellet.init();
-			cwaReasoner = new ClosedWorldReasoner(pellet);
+		 	reasoner.init();
+			cwaReasoner = new ClosedWorldReasoner(reasoner);
 			cwaReasoner.init();
 	}
 	
-	 public List<IndividualsDatatableModel> getIndividuals(String classExpression,boolean cwaMode){
-	        ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
+	 public List<IndividualsDatatableModel> getIndividuals(String classExpression,RetrieverConfiguration config) throws ComponentInitException {
+	     	initializeReasoner(config);
+
+		 	ShortFormProvider shortFormProvider = new SimpleShortFormProvider();
 	        // Create the DLQueryPrinter helper class. This will manage the
 	        // parsing of input and printing of results
-	        DLQueryPrinter dlQueryPrinter = new DLQueryPrinter(new DLQueryEngine(cwaMode ? cwaReasoner : cwaReasoner.getReasonerComponent(),cwaReasoner.getReasonerComponent().getOntology(),
+	        DLQueryPrinter dlQueryPrinter = new DLQueryPrinter(new DLQueryEngine(config.isCwaMode() ? cwaReasoner : cwaReasoner.getReasonerComponent(),cwaReasoner.getReasonerComponent().getOntology(),
 	                shortFormProvider), shortFormProvider);	
 	       return dlQueryPrinter.getIndividuals(classExpression.trim());
 	 }
