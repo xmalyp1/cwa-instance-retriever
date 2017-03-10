@@ -1,11 +1,11 @@
-package sk.stuba.fei.dp.maly.ui.models;
+package sk.stuba.fei.dp.maly.model.dto;
 
-public class IndividualsDatatableModel {
+public class InstanceDTO {
 
 	private String namedIndividual;
 	private String individualClass;
 	
-	public IndividualsDatatableModel(String ind,String owlClass){
+	public InstanceDTO(String ind, String owlClass){
 		this.namedIndividual = ind;
 		this.individualClass = owlClass;
 	}

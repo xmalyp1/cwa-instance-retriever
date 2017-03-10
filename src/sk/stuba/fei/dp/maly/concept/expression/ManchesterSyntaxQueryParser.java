@@ -1,4 +1,4 @@
-package sk.stuba.fei.dp.maly.queries;
+package sk.stuba.fei.dp.maly.concept.expression;
 
 import java.util.Set;
 
@@ -12,12 +12,13 @@ import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProvider;
 import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.ShortFormProvider;
+import sk.stuba.fei.dp.maly.exceptions.ManchesterSyntaxParseException;
 
-public class DLQueryParser {
+public class ManchesterSyntaxQueryParser {
     private final OWLOntology rootOntology;
     private final BidirectionalShortFormProvider bidiShortFormProvider;
 
-    public DLQueryParser(OWLOntology rootOntology, ShortFormProvider shortFormProvider) {
+    public ManchesterSyntaxQueryParser(OWLOntology rootOntology, ShortFormProvider shortFormProvider) {
         this.rootOntology = rootOntology;
         OWLOntologyManager manager = rootOntology.getOWLOntologyManager();
         Set<OWLOntology> importsClosure = rootOntology.getImportsClosure();
@@ -28,15 +29,21 @@ public class DLQueryParser {
                 importsClosure, shortFormProvider);
     }
 
-    public OWLClassExpression parseClassExpression(String classExpressionString) {
+    public OWLClassExpression parseClassExpression(String classExpressionString) throws ManchesterSyntaxParseException {
+
+        if (rootOntology == null || rootOntology.getOWLOntologyManager() == null) {
+            throw new ManchesterSyntaxParseException("Ontology or ontology manager was not initialized.");
+        }
         OWLDataFactory dataFactory = rootOntology.getOWLOntologyManager()
                 .getOWLDataFactory();
-        
         OWLEntityChecker entityChecker = new ShortFormEntityChecker(bidiShortFormProvider);
-     
-        ManchesterOWLSyntaxClassExpressionParser parser = new ManchesterOWLSyntaxClassExpressionParser(
-                dataFactory,entityChecker);
-        parser.setOWLEntityChecker(entityChecker);
-        return parser.parse(classExpressionString);
+        try {
+            ManchesterOWLSyntaxClassExpressionParser parser = new ManchesterOWLSyntaxClassExpressionParser(dataFactory, entityChecker);
+            parser.setOWLEntityChecker(entityChecker);
+            return parser.parse(classExpressionString);
+        } catch (Exception e) {
+            throw new ManchesterSyntaxParseException("Unable to parse query: " + classExpressionString);
+
         }
     }
+}

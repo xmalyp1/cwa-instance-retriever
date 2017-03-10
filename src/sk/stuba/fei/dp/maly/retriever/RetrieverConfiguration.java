@@ -15,22 +15,28 @@ import org.semanticweb.owlapi.model.OWLOntology;
 
 public class RetrieverConfiguration {
 
-    private boolean cwaMode;
+    private RetrieverMode mode;
     private ReasonerImplementation reasoner;
     private OWLOntology ontology;
 
-    public RetrieverConfiguration(ReasonerImplementation reasoner,OWLOntology ontology,boolean cwaMode){
-        this.cwaMode = cwaMode;
+    public RetrieverConfiguration(ReasonerImplementation reasoner,OWLOntology ontology,RetrieverMode mode){
+        this.mode = mode;
         this.ontology = ontology;
         this.reasoner = reasoner;
     }
 
-    public boolean isCwaMode() {
-        return cwaMode;
+    public RetrieverConfiguration(OWLOntology ontology){
+        this.ontology=ontology;
+        reasoner = ReasonerImplementation.HERMIT;
+        mode=RetrieverMode.OWA;
     }
 
-    public void setCwaMode(boolean cwaMode) {
-        this.cwaMode = cwaMode;
+    public RetrieverMode getMode() {
+        return mode;
+    }
+
+    public void setMode(RetrieverMode mode) {
+        this.mode = mode;
     }
 
     public ReasonerImplementation getReasoner() {
@@ -50,6 +56,6 @@ public class RetrieverConfiguration {
     }
 
     public static RetrieverConfiguration buildDefault(OWLOntology ontology){
-        return new RetrieverConfiguration(ReasonerImplementation.PELLET,ontology,false);
+        return new RetrieverConfiguration(ReasonerImplementation.PELLET,ontology,RetrieverMode.OWA);
     }
 }
