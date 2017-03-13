@@ -14,10 +14,22 @@ import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import sk.stuba.fei.dp.maly.exceptions.ManchesterSyntaxParseException;
 
+/**
+ * Objekt zodpovedný za spracovanie konceptuálneho výrazu vo formáte Manchester syntaxe
+ *
+ * @author Patrik Malý
+ */
 public class ManchesterSyntaxQueryParser {
     private final OWLOntology rootOntology;
     private final BidirectionalShortFormProvider bidiShortFormProvider;
 
+    /**
+     * Konštruktor pre vytvorenie objektu
+     * @param rootOntology vstupná ontológia
+     * @param shortFormProvider objekt zodpovedný za jednoduchú reprezentáciu OWL entít
+     *
+     * @see ShortFormProvider
+     */
     public ManchesterSyntaxQueryParser(OWLOntology rootOntology, ShortFormProvider shortFormProvider) {
         this.rootOntology = rootOntology;
         OWLOntologyManager manager = rootOntology.getOWLOntologyManager();
@@ -29,6 +41,12 @@ public class ManchesterSyntaxQueryParser {
                 importsClosure, shortFormProvider);
     }
 
+    /**
+     * Metóda, ktorej úlohou je spracovanie vstupného konceptuálneho výrazu.
+     * @param classExpressionString vstupný konceptuálny výraz
+     * @return konceptuálny výraz, ktorý je reprezentovaný objektom {@link OWLClassExpression}
+     * @throws ManchesterSyntaxParseException v prípade, že sa vstupný reťazec nepodarí spracovať
+     */
     public OWLClassExpression parseClassExpression(String classExpressionString) throws ManchesterSyntaxParseException {
 
         if (rootOntology == null || rootOntology.getOWLOntologyManager() == null) {

@@ -1,7 +1,8 @@
 package sk.stuba.fei.dp.maly.exceptions;
 
 /**
- * Created by Patrik on 10/03/2017.
+ * Výnimka, ktorá obsluhuje chybnú konfiguráciu komponenty instance retriever
+ * @author Patrik Malý
  */
 public class InstanceRetrieverConfigException extends Exception {
 

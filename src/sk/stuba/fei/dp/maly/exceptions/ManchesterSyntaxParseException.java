@@ -1,7 +1,8 @@
 package sk.stuba.fei.dp.maly.exceptions;
 
 /**
- * Created by Patrik on 10/03/2017.
+ * Výnimka, ktorá obsluhuje chybu spracovania vstupného konceptuálneho výrazu
+ * @author Patrik Malý
  */
 public class ManchesterSyntaxParseException extends Exception {
 
