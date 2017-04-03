@@ -1,7 +1,5 @@
 package sk.stuba.fei.dp.maly.concept.expression;
 
-import java.util.Set;
-
 import org.semanticweb.owlapi.expression.OWLEntityChecker;
 import org.semanticweb.owlapi.expression.ShortFormEntityChecker;
 import org.semanticweb.owlapi.manchestersyntax.parser.ManchesterOWLSyntaxClassExpressionParser;
@@ -14,6 +12,8 @@ import org.semanticweb.owlapi.util.BidirectionalShortFormProviderAdapter;
 import org.semanticweb.owlapi.util.ShortFormProvider;
 import sk.stuba.fei.dp.maly.exceptions.ManchesterSyntaxParseException;
 
+import java.util.Set;
+
 /**
  * Objekt zodpovedný za spracovanie konceptuálneho výrazu vo formáte Manchester syntaxe
  *
@@ -25,9 +25,9 @@ public class ManchesterSyntaxQueryParser {
 
     /**
      * Konštruktor pre vytvorenie objektu
-     * @param rootOntology vstupná ontológia
-     * @param shortFormProvider objekt zodpovedný za jednoduchú reprezentáciu OWL entít
      *
+     * @param rootOntology      vstupná ontológia
+     * @param shortFormProvider objekt zodpovedný za jednoduchú reprezentáciu OWL entít
      * @see ShortFormProvider
      */
     public ManchesterSyntaxQueryParser(OWLOntology rootOntology, ShortFormProvider shortFormProvider) {
@@ -43,6 +43,7 @@ public class ManchesterSyntaxQueryParser {
 
     /**
      * Metóda, ktorej úlohou je spracovanie vstupného konceptuálneho výrazu.
+     *
      * @param classExpressionString vstupný konceptuálny výraz
      * @return konceptuálny výraz, ktorý je reprezentovaný objektom {@link OWLClassExpression}
      * @throws ManchesterSyntaxParseException v prípade, že sa vstupný reťazec nepodarí spracovať
@@ -59,6 +60,8 @@ public class ManchesterSyntaxQueryParser {
             ManchesterOWLSyntaxClassExpressionParser parser = new ManchesterOWLSyntaxClassExpressionParser(dataFactory, entityChecker);
             parser.setOWLEntityChecker(entityChecker);
             return parser.parse(classExpressionString);
+
+            //Nepodarilo sa rozprasovať konceptuálny výraz, vytvor výnimku
         } catch (Exception e) {
             throw new ManchesterSyntaxParseException("Unable to parse query: " + classExpressionString);
 
