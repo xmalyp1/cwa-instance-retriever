@@ -1,5 +1,7 @@
 package sk.stuba.fei.dp.maly.model.dto;
 
+import java.util.List;
+
 /**
  * Objekt {@code InstanceDTO} predstavuje model, výsledkov dopytovania pomocou komponenty instance retriever
  * Po dopytovaní inštancií pomocou objektu {@link sk.stuba.fei.dp.maly.retriever.InstanceRetriever} sa nám vráti zoznam inštancií, ktoré sú reprezentované týmto objektom.
@@ -17,11 +19,11 @@ package sk.stuba.fei.dp.maly.model.dto;
 public class InstanceDTO {
 
 	private String namedIndividual;
-	private String individualClass;
+	private List<String> individualClasses;
 	
-	public InstanceDTO(String ind, String owlClass){
+	public InstanceDTO(String ind, List<String> owlClasses){
 		this.namedIndividual = ind;
-		this.individualClass = owlClass;
+		this.individualClasses = owlClasses;
 	}
 
 	public String getNamedIndividual() {
@@ -32,12 +34,12 @@ public class InstanceDTO {
 		this.namedIndividual = namedIndividual;
 	}
 
-	public String getIndividualClass() {
-		return individualClass;
+	public List<String> getIndividualClasses() {
+		return individualClasses;
 	}
 
-	public void setIndividualClass(String individualClass) {
-		this.individualClass = individualClass;
+	public void setIndividualClasses(List<String> individualClasses) {
+		this.individualClasses = individualClasses;
 	}
 	
 	

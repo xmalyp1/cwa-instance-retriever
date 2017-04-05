@@ -40,6 +40,7 @@ public class InstanceRetriever {
 
     private OWLOntologyManager ontologyManager;
     private ClosedWorldReasoner cwaReasoner;
+    private DLQueryEngine engine;
     private RetrieverConfiguration config;
 
     /**
@@ -88,7 +89,6 @@ public class InstanceRetriever {
 
         cwaReasoner = new ClosedWorldReasoner(reasoner);
         cwaReasoner.init();
-
     }
 
     /**
@@ -112,7 +112,7 @@ public class InstanceRetriever {
         // Create the OWLIndividualConverter helper class. This will manage the
         // parsing of input and printing of results
         OWLIndividualConverter converter = new OWLIndividualConverter(shortFormProvider);
-        DLQueryEngine engine = new DLQueryEngine(config.getMode() == RetrieverMode.CWA ? cwaReasoner : cwaReasoner.getReasonerComponent(), cwaReasoner.getReasonerComponent().getOntology(),
+        engine = new DLQueryEngine(config.getMode() == RetrieverMode.CWA ? cwaReasoner : cwaReasoner.getReasonerComponent(), cwaReasoner.getReasonerComponent().getOntology(),
                 shortFormProvider);
         return converter.formatOWLIndividuals(engine.getInstances(classExpression),engine);
     }

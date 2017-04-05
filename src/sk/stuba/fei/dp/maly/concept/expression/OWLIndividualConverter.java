@@ -22,6 +22,7 @@ import sk.stuba.fei.dp.maly.model.dto.InstanceDTO;
  */
 public class OWLIndividualConverter {
 
+	private static final String TOP_CLASS = "Thing";
     private final ShortFormProvider shortFormProvider;
 
 	/**
@@ -42,17 +43,32 @@ public class OWLIndividualConverter {
 		List<InstanceDTO> result = new ArrayList<>();
 		for(OWLIndividual classNonNamedInstance : individuals){
 			OWLNamedIndividual classInstance = (OWLNamedIndividual) classNonNamedInstance;
-			StringBuilder sb = new StringBuilder();
+			List<String> inClasses = new ArrayList<>();
 			Set<OWLClass> inClass = engine.getClassOfIndividual(classInstance);
 			for(OWLClass cClass : inClass){
-				sb.append(shortFormProvider.getShortForm(cClass));
-				sb.append(",");
+				inClasses.add(shortFormProvider.getShortForm(cClass));
 			}
-			if(sb.length() > 0)
-				sb.deleteCharAt(sb.length()-1);
-			result.add(new InstanceDTO(shortFormProvider.getShortForm(classInstance),sb.toString()));
+			
+			if(onlyInTopClass(inClasses)){
+				inClasses.clear();
+				inClasses.add(TOP_CLASS);
+			}
+			
+			result.add(new InstanceDTO(shortFormProvider.getShortForm(classInstance),inClasses));
 		}
 		return result;
+	}
+	
+	private boolean onlyInTopClass(List<String> inClasses){
+		if(inClasses.isEmpty() || inClasses.size() == 1){
+			if(inClasses.size() == 1){
+				String tmp = inClasses.get(0);
+				return tmp.isEmpty();
+			}
+			return true;
+		}else{
+			return false;
+		}
 	}
 
     //Pizza that  not(hasTopping only MeatTopping)
